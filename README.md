@@ -176,9 +176,55 @@ pnpm test:coverage
 pnpm test --watch
 ```
 
-## Deployment
+## Deployment to GitHub Pages
 
-This application is automatically deployed to GitHub Pages when changes are pushed to the main branch.
+This application is configured for automatic deployment to GitHub Pages using GitHub Actions.
+
+### Initial Setup
+
+1. **Create a GitHub repository** (if you haven't already):
+   - Go to [GitHub](https://github.com) and create a new repository
+   - Name it `enzyme-assay-app-v2` (or update the `base` path in `vite.config.ts` to match your repo name)
+   - **Do NOT** initialize with README, .gitignore, or license (you already have these)
+
+2. **Push your code to GitHub**:
+   ```bash
+   # If you haven't added a remote yet:
+   git remote add origin https://github.com/YOUR_USERNAME/enzyme-assay-app-v2.git
+   
+   # Push to GitHub:
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git push -u origin main
+   ```
+
+3. **Enable GitHub Pages**:
+   - Go to your repository on GitHub
+   - Click **Settings** → **Pages**
+   - Under **Source**, select **GitHub Actions** (not "Deploy from a branch")
+   - Save the settings
+
+4. **Verify the deployment**:
+   - Go to **Actions** tab in your repository
+   - You should see the "Deploy to GitHub Pages" workflow running
+   - Once complete, your site will be available at:
+     `https://YOUR_USERNAME.github.io/enzyme-assay-app-v2/`
+
+### Automatic Deployment
+
+After the initial setup, every push to the `main` branch will automatically:
+- Build the application
+- Deploy it to GitHub Pages
+- Make it available at your GitHub Pages URL
+
+You can also manually trigger a deployment from the **Actions** tab by clicking "Run workflow".
+
+### Important Notes
+
+- The `base` path in `vite.config.ts` is set to `/enzyme-assay-app-v2/` - make sure this matches your repository name
+- If your repository has a different name, update the `base` path accordingly
+- The deployment workflow uses GitHub Actions, so make sure Actions are enabled in your repository settings
 
 ## License
 
