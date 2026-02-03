@@ -62,7 +62,7 @@ export const WellGrid: React.FC<WellGridProps> = ({
       case 'control100':
         return '100% Control Wells'
       case 'combined':
-        return 'Select Wells & Control Wells'
+        return 'Select Control Wells'
       default:
         return 'Select Wells'
     }

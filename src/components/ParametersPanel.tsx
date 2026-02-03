@@ -206,7 +206,7 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="block text-sm font-medium text-gray-700">
-            Select Wells
+            Select Control Wells
           </label>
           <button
             onClick={() => setIsWellSelectorCollapsed(!isWellSelectorCollapsed)}
@@ -289,6 +289,9 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
           
           {/* 0% Control Option */}
           <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              0% Control Value
+            </label>
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
