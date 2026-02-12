@@ -75,14 +75,15 @@ export const WellSparklineGrid: React.FC<WellSparklineGridProps> = ({
 
   return (
     <div className="space-y-4">
-      <div
-        className="grid gap-0 w-full max-w-full overflow-hidden"
-        style={{
-          gridTemplateColumns: `28px repeat(12, ${cellWidth}px)`,
-          width: 'fit-content',
-          maxWidth: '100%'
-        }}
-      >
+      <div className="flex flex-wrap items-start gap-4">
+        <div
+          className="grid gap-0 w-full max-w-full overflow-hidden flex-shrink-0"
+          style={{
+            gridTemplateColumns: `28px repeat(12, ${cellWidth}px)`,
+            width: 'fit-content',
+            maxWidth: '100%'
+          }}
+        >
         <div className="h-6 flex-shrink-0" />
         {COLS.map(col => (
           <div
@@ -151,23 +152,24 @@ export const WellSparklineGrid: React.FC<WellSparklineGridProps> = ({
             })}
           </React.Fragment>
         ))}
-      </div>
-      {mode === 'combined' && (
-        <div className="text-sm text-gray-600 space-y-1">
-          <p className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded border flex-shrink-0" style={{ backgroundColor: PASTEL.sample }} />
-            Sample Wells: {selected.size - control0Wells.size - control100Wells.size}
-          </p>
-          <p className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded border flex-shrink-0" style={{ backgroundColor: PASTEL.control0 }} />
-            0% Control: {control0Wells.size}
-          </p>
-          <p className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded border flex-shrink-0" style={{ backgroundColor: PASTEL.control100 }} />
-            100% Control: {control100Wells.size}
-          </p>
         </div>
-      )}
+        {mode === 'combined' && (
+          <div className="text-sm text-gray-600 space-y-1.5 flex-shrink-0 pt-1">
+            <p className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded border flex-shrink-0" style={{ backgroundColor: PASTEL.sample }} />
+              Sample Wells: {selected.size - control0Wells.size - control100Wells.size}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded border flex-shrink-0" style={{ backgroundColor: PASTEL.control0 }} />
+              0% Control: {control0Wells.size}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded border flex-shrink-0" style={{ backgroundColor: PASTEL.control100 }} />
+              100% Control: {control100Wells.size}
+            </p>
+          </div>
+        )}
+      </div>
       {mode === 'wells' && <p className="text-sm text-gray-600">Selected: {selected.size} wells</p>}
     </div>
   )
