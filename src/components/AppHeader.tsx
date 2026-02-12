@@ -81,7 +81,7 @@ export const AppHeader: React.FC = () => {
                 <ul className="list-disc pl-5 mt-2 space-y-1">
                   <li>Load your data either by copying and pasting from the excel sheet or uploading the excel file obtained from the plate reader</li>
                   <li>Data files should not contain any gaps or spaces between characters and avoid unusual characters</li>
-                  <li>Default setting for half lysis time is 50% but can be adjusted</li>
+                  <li>Default setting for percentage lysis time is 50% but can be adjusted</li>
                   <li>Max lysis rate uses the average of the last 10 values along the equilibrium</li>
                 </ul>
               </div>
@@ -103,7 +103,7 @@ export const AppHeader: React.FC = () => {
               <div>
                 <h3 className="font-semibold text-gray-900">Control Value Option:</h3>
                 <ul className="list-disc pl-5 mt-2 space-y-1">
-                  <li>0% Control Value provides backgrounf fluorescence. The default calculation would treat the background noise as 0, but can be adjusted.</li>
+                  <li>0% Control Value provides background fluorescence. The default calculation would treat the background noise as 0, but can be adjusted.</li>
                   <li>100% Control Value is the fully fibrinolytic sample. The default calculation would be the average of the last 10 values of the selected 100% Control Wells. A custom valye can also be used.</li>
                 </ul>
               </div>

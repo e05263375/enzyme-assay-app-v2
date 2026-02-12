@@ -60,7 +60,12 @@ const PlateResultsGrid = memo(() => {
             className="px-1 rounded bg-gray-200 hover:bg-gray-300 text-xs"
             aria-label="Decrease significant digits"
           >−</button>
-          <span className="text-gray-500">{sigDigits} dp</span>
+          <span 
+            className="text-gray-500 cursor-help" 
+            title="Decimal Point"
+          >
+            {sigDigits} dp
+          </span>
           <button
             onClick={incDigits}
             className="px-1 rounded bg-gray-200 hover:bg-gray-300 text-xs"

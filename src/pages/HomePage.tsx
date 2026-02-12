@@ -22,7 +22,7 @@ export const HomePage: React.FC = () => {
           tabs={[
             {
               id: 'data',
-              label: 'Input',
+              label: 'Data Loading',
               content: <DataInputPanel onNext={() => tabbedInterfaceRef.current?.setActiveTab('params')} />
             },
             {

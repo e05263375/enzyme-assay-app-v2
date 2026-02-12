@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useAssayStore, HoFFMetric } from '../features/hooks'
-import { WellGrid } from './WellGrid'
+import { WellSparklineGrid } from './WellSparklineGrid'
 
 interface ParametersPanelProps {
   onCalculate?: () => void
@@ -188,15 +188,34 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
             <input
               type="range"
               min={1}
-              max={50}
+              max={30}
               value={smoothingWindow}
               onChange={(e) => setSmoothingWindow(parseInt(e.target.value) || 10)}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              step={1}
             />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>1</span>
-              <span className="font-medium text-gray-700">{smoothingWindow}</span>
-              <span>50</span>
+            <div className="relative" style={{ height: '32px', marginTop: '8px', paddingTop: '4px' }}>
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((num) => (
+                <span
+                  key={num}
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: `${((num - 1) / 29) * 100}%`,
+                    transform: 'translateX(-50%)',
+                    fontSize: num === smoothingWindow ? '10px' : '7px',
+                    color: num === smoothingWindow ? '#2258cf' : '#9ca3af',
+                    fontWeight: num === smoothingWindow ? 'bold' : 'normal',
+                    whiteSpace: 'nowrap',
+                    lineHeight: '1',
+                    top: num === smoothingWindow ? '0px' : '12px'
+                  }}
+                >
+                  {num}
+                </span>
+              ))}
+            </div>
+            <div className="text-center text-xs text-gray-700 font-medium mt-4">
+              Current: {smoothingWindow}
             </div>
           </div>
         </div>
@@ -223,7 +242,8 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
             {/* For T2943: Simple well selection */}
             {assayType === 'T2943' && (
               <div className="border rounded-lg p-4 bg-gray-50">
-                <WellGrid
+                <WellSparklineGrid
+                  rawData={rawData}
                   selected={selectedWells}
                   onChange={handleSimpleWellToggle}
                   mode="wells"
@@ -267,8 +287,9 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
                   </button>
                 </div>
 
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <WellGrid
+                <div className="border rounded-lg p-4 bg-gray-50 overflow-auto max-h-[420px]">
+                  <WellSparklineGrid
+                    rawData={rawData}
                     selected={selectedWells}
                     onChange={handleCombinedWellToggle}
                     control0Wells={control0Wells}
@@ -302,9 +323,6 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
               />
               <span className="text-sm text-gray-700">
                 Use actual 0% control well values
-                {control0Wells.size < 2 && (
-                  <span className="text-xs text-gray-500 ml-1">(requires 2+ wells selected)</span>
-                )}
               </span>
             </label>
             {!useActual0Control && (
@@ -376,47 +394,44 @@ export const ParametersPanel: React.FC<ParametersPanelProps> = ({ onCalculate })
           <h3 className="text-sm font-semibold text-gray-900">Calculation Option</h3>
           <div className="space-y-2">
             {(['FI', 'HLT', 'MLR', 'TMLR'] as HoFFMetric[]).map((metric) => (
-              <label key={metric} className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="hoffMetric"
-                  value={metric}
-                  checked={hoffMetric === metric}
-                  onChange={(e) => setHoffMetric(e.target.value as HoFFMetric)}
-                  className="w-4 h-4 text-accent focus:ring-accent"
-                />
-                <span className="text-sm text-gray-700">
-                  {metric === 'HLT' && 'Half Lysis Time (HLT)'}
-                  {metric === 'MLR' && 'Max Lysis Rate (MLR)'}
-                  {metric === 'TMLR' && 'Time of Max Lysis Rate (TMLR)'}
-                  {metric === 'FI' && 'Fibrinolysis Index (FI)'}
-                </span>
-              </label>
+              <div key={metric} className="flex items-center gap-2 flex-wrap">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="hoffMetric"
+                    value={metric}
+                    checked={hoffMetric === metric}
+                    onChange={(e) => setHoffMetric(e.target.value as HoFFMetric)}
+                    className="w-4 h-4 text-accent focus:ring-accent"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {metric === 'HLT' && 'Percentage Lysis Time'}
+                    {metric === 'MLR' && 'Max Lysis Rate (MLR)'}
+                    {metric === 'TMLR' && 'Time of Max Lysis Rate (TMLR)'}
+                    {metric === 'FI' && 'Fibrinolysis Index (FI)'}
+                  </span>
+                </label>
+                {metric === 'HLT' && (
+                  <select
+                    value={hltPercentage}
+                    onChange={(e) => setHltPercentage(parseInt(e.target.value, 10))}
+                    className="input-field text-sm w-14"
+                    onClick={(e) => e.stopPropagation()}
+                    title="Percentage"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => {
+                      const percentage = (i + 1) * 10
+                      return (
+                        <option key={percentage} value={percentage}>
+                          {percentage}%
+                        </option>
+                      )
+                    })}
+                  </select>
+                )}
+              </div>
             ))}
           </div>
-          
-          {/* HLT Percentage Dropdown - only show when HLT is selected */}
-          {hoffMetric === 'HLT' && (
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Half Lysis Time Percentage
-              </label>
-              <select
-                value={hltPercentage}
-                onChange={(e) => setHltPercentage(parseInt(e.target.value, 10))}
-                className="input-field"
-              >
-                {Array.from({ length: 10 }, (_, i) => {
-                  const percentage = (i + 1) * 10
-                  return (
-                    <option key={percentage} value={percentage}>
-                      {percentage}%
-                    </option>
-                  )
-                })}
-              </select>
-            </div>
-          )}
         </div>
       )}
 

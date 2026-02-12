@@ -94,7 +94,7 @@ export const useAssayStore = create<AppStore>((set, get) => ({
   assayType: 'HoFF',
   timeRange: [0, 60],
   smoothingWindow: 10,
-  hoffMetric: 'HLT',
+  hoffMetric: 'FI',
   hltPercentage: 50,
   useActual0Control: false, // Default: use 0 for 0% control
   custom100ControlValue: null, // Default: use average of selected 100% wells

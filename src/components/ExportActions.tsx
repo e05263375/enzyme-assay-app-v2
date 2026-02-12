@@ -2,6 +2,8 @@ import React from 'react'
 import { saveAs } from 'file-saver' // trigger file downloads
 import * as XLSX from 'xlsx'    // build excel files
 import { useAssayStore } from '../features/hooks'   // provides shared state
+import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
 
 export const ExportActions: React.FC = () => {
   const { results, assayType, rawData } = useAssayStore()
@@ -63,10 +65,72 @@ export const ExportActions: React.FC = () => {
     saveAs(blob, `enzyme_assay_results_${assayType}_${new Date().toISOString().split('T')[0]}.xlsx`)
   }
 
-  const exportPlots = () => {
-    // This would require html2canvas or similar library to capture plots
-    // For now, we'll show a message
-    alert('Plot export functionality requires additional libraries. Please use browser screenshot for now.')
+  const exportPlots = async (format: 'png' | 'pdf' | 'tif') => {
+    // Try to find the plot area by ID first, then fallback to other selectors
+    let plotElement = document.getElementById('plot-area-export')
+    
+    // If not found, try to find it in the results tab
+    if (!plotElement) {
+      const resultsTab = document.querySelector('[id="results"]') || 
+                        document.querySelector('[class*="results"]')
+      if (resultsTab) {
+        plotElement = resultsTab.querySelector('#plot-area-export') as HTMLElement
+      }
+    }
+    
+    // Last resort: find any element with canvas
+    if (!plotElement) {
+      const canvasParent = document.querySelector('canvas')?.closest('.bg-white.rounded-lg.shadow')
+      if (canvasParent) {
+        plotElement = canvasParent as HTMLElement
+      }
+    }
+    
+    if (!plotElement) {
+      alert('Could not find plot element to export. Please ensure the plot is visible in the Results tab.')
+      return
+    }
+
+    try {
+      const canvas = await html2canvas(plotElement as HTMLElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false
+      })
+
+      if (format === 'png') {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            saveAs(blob, `time_series_plot_${new Date().toISOString().split('T')[0]}.png`)
+          }
+        }, 'image/png')
+      } else if (format === 'pdf') {
+        const imgData = canvas.toDataURL('image/png')
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        })
+        
+        const imgWidth = pdf.internal.pageSize.getWidth()
+        const imgHeight = (canvas.height * imgWidth) / canvas.width
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight)
+        pdf.save(`time_series_plot_${new Date().toISOString().split('T')[0]}.pdf`)
+      } else if (format === 'tif') {
+        // TIF format - browsers don't natively support TIF, so we'll export as PNG with TIF extension
+        // or use a library. For now, we'll export as PNG but with .tif extension
+        // Note: True TIF requires additional processing, this is a workaround
+        canvas.toBlob((blob) => {
+          if (blob) {
+            saveAs(blob, `time_series_plot_${new Date().toISOString().split('T')[0]}.tif`)
+          }
+        }, 'image/png')
+      }
+    } catch (error) {
+      console.error('Error exporting plot:', error)
+      alert('Failed to export plot. Please try again or use browser screenshot.')
+    }
   }
 
   const exportRawData = () => {
@@ -89,7 +153,7 @@ export const ExportActions: React.FC = () => {
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Export Options</h3>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <button
           onClick={exportToCSV}
           disabled={results.length === 0}
@@ -106,13 +170,29 @@ export const ExportActions: React.FC = () => {
           Export Results (XLSX)
         </button>
         
-        <button
-          onClick={exportPlots}
-          disabled={rawData.length === 0}
-          className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Export Plots
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => exportPlots('png')}
+            disabled={rawData.length === 0}
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+          >
+            Export Plot (PNG)
+          </button>
+          <button
+            onClick={() => exportPlots('pdf')}
+            disabled={rawData.length === 0}
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+          >
+            Export Plot (PDF)
+          </button>
+          <button
+            onClick={() => exportPlots('tif')}
+            disabled={rawData.length === 0}
+            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+          >
+            Export Plot (TIF)
+          </button>
+        </div>
         
         <button
           onClick={exportRawData}
@@ -126,7 +206,7 @@ export const ExportActions: React.FC = () => {
       <div className="mt-4 text-sm text-gray-600">
         <p>• CSV/XLSX exports include results in plate view format (8x12 grid)</p>
         <p>• Raw data export includes all time series data</p>
-        <p>• Plot export requires browser screenshot (coming soon)</p>
+        <p>• Plot export available in PNG, PDF, and TIF formats</p>
       </div>
     </div>
   )

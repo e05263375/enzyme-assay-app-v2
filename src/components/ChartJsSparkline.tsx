@@ -31,6 +31,10 @@ interface ChartJsSparklineProps {
   isSelected?: boolean
   yDomain?: [number, number]
   xDomain?: number
+  /** When true, no tooltip/hover; use for static control-well grid */
+  static?: boolean
+  /** When isSelected and set, use this as background (pastel) and line color red */
+  selectionPastelColor?: string
 }
 
 export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
@@ -41,9 +45,10 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
   onClick,
   isSelected = false,
   yDomain = [0, 1],
-  xDomain = 10
+  xDomain = 10,
+  static: staticMode = false,
+  selectionPastelColor
 }) => {
-  console.log('ChartJsSparkline data', data)
 
   if (data.length === 0) {
     return (
@@ -66,20 +71,24 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
     )
   }
 
-  // Use the passed yDomain instead of calculating individual domain
   const chartYDomain = yDomain
+
+  const lineColor = staticMode && isSelected && selectionPastelColor ? '#ef4444' : color
+  const bgStyle = staticMode && isSelected && selectionPastelColor
+    ? { backgroundColor: selectionPastelColor }
+    : undefined
 
   const chartData = {
     labels: data.map((_, i) => i),
     datasets: [
       {
         data: data,
-        borderColor: color,
-        backgroundColor: color,
+        borderColor: lineColor,
+        backgroundColor: lineColor,
         borderWidth: 1.5,
         pointRadius: 0,
-        pointHoverRadius: 2,
-        tension: 0.1, // Slight curve for smoother appearance
+        pointHoverRadius: staticMode ? 0 : 2,
+        tension: 0.1,
         fill: false
       }
     ]
@@ -91,7 +100,7 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
     plugins: {
       legend: { display: false },
       tooltip: {
-        enabled: true,
+        enabled: !staticMode,
         mode: 'index' as const,
         intersect: false,
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -111,18 +120,14 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
       x: {
         display: false,
         min: 0,
-        max: xDomain, // Use xDomain instead of data.length - 1
-        grid: {
-          display: false
-        }
+        max: xDomain,
+        grid: { display: false }
       },
       y: {
         display: false,
         min: chartYDomain[0],
         max: chartYDomain[1],
-        grid: {
-          display: false
-        }
+        grid: { display: false }
       }
     },
     interaction: {
@@ -131,15 +136,15 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
     },
     elements: {
       point: {
-        hoverRadius: 2
+        hoverRadius: staticMode ? 0 : 2
       }
     }
   }
 
   return (
     <div
-      className={`cursor-pointer border rounded bg-white flex-shrink-0 ${
-        isSelected ? 'border-accent bg-accent/5' : 'border-gray-200'
+      className={`cursor-pointer border rounded flex-shrink-0 ${
+        !staticMode && isSelected ? 'border-accent bg-accent/5' : staticMode && isSelected && selectionPastelColor ? 'border-gray-300' : 'bg-white border-gray-200'
       }`}
       style={{ 
         width: `${width}px`, 
@@ -147,7 +152,8 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
         minWidth: `${width}px`,
         maxWidth: `${width}px`,
         minHeight: `${height}px`,
-        maxHeight: `${height}px`
+        maxHeight: `${height}px`,
+        ...bgStyle
       }}
       onClick={onClick}
     >

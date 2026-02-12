@@ -2,7 +2,12 @@ import React, { useState } from 'react'
 import { ChartJsSparkline } from './ChartJsSparkline'
 import { useAssayStore } from '../features/hooks'
 
-export const PlotArea: React.FC = () => {
+interface PlotAreaProps {
+  /** When true, use smaller cells so full 8x12 grid fits without vertical scroll */
+  compact?: boolean
+}
+
+export const PlotArea: React.FC<PlotAreaProps> = ({ compact = false }) => {
   const { rawData, selectedWells, results, setSelectedWells } = useAssayStore()
   const [isCollapsed, setIsCollapsed] = useState(false)
 
@@ -16,7 +21,6 @@ export const PlotArea: React.FC = () => {
       id = wellId.charAt(0) + wellId.slice(2)
     }
     const found = rawData.find(well => well.wellId === id)
-    console.log('getWellData', wellId, id, found)
     return found?.timePoints || []
   }
 
@@ -79,8 +83,12 @@ export const PlotArea: React.FC = () => {
 
   const globalYDomain = calculateGlobalYDomain()
 
+  const cellWidth = compact ? 70 : 90
+  const cellHeight = compact ? 50 : 75
+  const totalHeight = compact ? 8 * cellHeight + 32 : 480
+
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-6" id="plot-area-export">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center space-x-2">
           <h3 className="text-lg font-medium text-gray-900">Time Series Plots</h3>
@@ -102,12 +110,12 @@ export const PlotArea: React.FC = () => {
       {/* Scrollable container */}
       {!isCollapsed && (
         <div className="overflow-auto">
-          {/* Grid with minimum width to ensure scrolling */}
           <div 
-            className="grid gap-0 h-[480px]" 
+            className="grid gap-0"
             style={{ 
-              gridTemplateColumns: `60px repeat(${colsWithData.length}, 90px)`,
-              minWidth: `${60 + (colsWithData.length * 90)}px`
+              gridTemplateColumns: `60px repeat(${colsWithData.length}, ${cellWidth}px)`,
+              minWidth: `${60 + (colsWithData.length * cellWidth)}px`,
+              height: `${totalHeight}px`
             }}
           >
           {/* Column headers */}
@@ -121,7 +129,7 @@ export const PlotArea: React.FC = () => {
           {/* Row headers and sparklines */}
           {rowsWithData.map(row => (
             <React.Fragment key={row}>
-              <div className="flex items-center justify-center text-xs font-medium text-gray-500 sticky left-0 bg-white z-10" style={{ height: '75px', minHeight: '75px', maxHeight: '75px' }}>
+              <div className="flex items-center justify-center text-xs font-medium text-gray-500 sticky left-0 bg-white z-10" style={{ height: cellHeight, minHeight: cellHeight, maxHeight: cellHeight }}>
                 {row}
               </div>
               {colsWithData.map(col => {
@@ -130,16 +138,15 @@ export const PlotArea: React.FC = () => {
                 const color = getWellColor(wellId)
                 const isSelected = selectedWells.has(wellId)
                 
-                // Hide cells with no data
                 if (data.length === 0) {
                   return (
-                    <div key={wellId} className="h-9 flex items-center justify-center" style={{ 
-                      width: '90px', 
-                      minWidth: '90px', 
-                      maxWidth: '90px', 
-                      height: '75px', 
-                      minHeight: '75px', 
-                      maxHeight: '75px',
+                    <div key={wellId} className="flex items-center justify-center" style={{ 
+                      width: cellWidth, 
+                      minWidth: cellWidth, 
+                      maxWidth: cellWidth, 
+                      height: cellHeight, 
+                      minHeight: cellHeight, 
+                      maxHeight: cellHeight,
                       backgroundColor: '#f9fafb',
                       border: '1px dashed #d1d5db'
                     }}>
@@ -149,11 +156,11 @@ export const PlotArea: React.FC = () => {
                 }
                 
                 return (
-                  <div key={wellId} className="h-9 flex items-center justify-center" style={{ width: '90px', minWidth: '90px', maxWidth: '90px', height: '75px', minHeight: '75px', maxHeight: '75px' }}>
+                  <div key={wellId} className="flex items-center justify-center" style={{ width: cellWidth, minWidth: cellWidth, maxWidth: cellWidth, height: cellHeight, minHeight: cellHeight, maxHeight: cellHeight }}>
                     <ChartJsSparkline
                       data={data}
-                      width={90}
-                      height={75}
+                      width={cellWidth}
+                      height={cellHeight}
                       color={color}
                       isSelected={isSelected}
                       onClick={() => handleWellClick(wellId)}
