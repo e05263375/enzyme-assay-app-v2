@@ -2,7 +2,6 @@ import React, { useRef } from 'react'
 import { AppHeader } from '../components/AppHeader'
 import { DataInputPanel } from '../components/DataInputPanel'
 import { ParametersPanel } from '../components/ParametersPanel'
-import { PlotArea } from '../components/PlotArea'
 import PlateResultsGrid from '../components/PlateResultsGrid'
 import { ExportActions } from '../components/ExportActions'
 import { TabbedInterface, TabbedInterfaceRef } from '../components/TabbedInterface'
@@ -34,11 +33,10 @@ export const HomePage: React.FC = () => {
               id: 'results',
               label: 'Results',
               content: (
-        <div className="flex flex-col gap-8">
-          <PlotArea />
-          <PlateResultsGrid />
-          <ExportActions />
-        </div>
+                <div className="flex flex-col gap-8">
+                  <PlateResultsGrid />
+                  <ExportActions />
+                </div>
               )
             }
           ]}

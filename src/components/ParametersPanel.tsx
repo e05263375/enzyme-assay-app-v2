@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useAssayStore, HoFFMetric } from '../features/hooks'
-import { WellSparklineGrid } from './WellSparklineGrid'
+import { WellSparklineGrid } from './WellSparklineGrid.tsx'
 
 interface ParametersPanelProps {
   onCalculate?: () => void
