@@ -33,7 +33,7 @@ interface ChartJsSparklineProps {
   xDomain?: number
   /** When true, no tooltip/hover; use for static control-well grid */
   static?: boolean
-  /** When isSelected and set, use this as background (pastel) and line color red */
+  /** When isSelected and set, use as background (pastel) and line color red */
   selectionPastelColor?: string
 }
 
@@ -72,11 +72,8 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
   }
 
   const chartYDomain = yDomain
-
   const lineColor = staticMode && isSelected && selectionPastelColor ? '#ef4444' : color
-  const bgStyle = staticMode && isSelected && selectionPastelColor
-    ? { backgroundColor: selectionPastelColor }
-    : undefined
+  const bgStyle = staticMode && isSelected && selectionPastelColor ? { backgroundColor: selectionPastelColor } : undefined
 
   const chartData = {
     labels: data.map((_, i) => i),
@@ -120,14 +117,18 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
       x: {
         display: false,
         min: 0,
-        max: xDomain,
-        grid: { display: false }
+        max: xDomain, // Use xDomain instead of data.length - 1
+        grid: {
+          display: false
+        }
       },
       y: {
         display: false,
         min: chartYDomain[0],
         max: chartYDomain[1],
-        grid: { display: false }
+        grid: {
+          display: false
+        }
       }
     },
     interaction: {
@@ -146,8 +147,8 @@ export const ChartJsSparkline: React.FC<ChartJsSparklineProps> = ({
       className={`cursor-pointer border rounded flex-shrink-0 ${
         !staticMode && isSelected ? 'border-accent bg-accent/5' : staticMode && isSelected && selectionPastelColor ? 'border-gray-300' : 'bg-white border-gray-200'
       }`}
-      style={{ 
-        width: `${width}px`, 
+      style={{
+        width: `${width}px`,
         height: `${height}px`,
         minWidth: `${width}px`,
         maxWidth: `${width}px`,

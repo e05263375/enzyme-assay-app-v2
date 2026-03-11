@@ -4,7 +4,7 @@ import { calcT2943, calcHoFF, validateWellData } from '../utils/metrics'
 
 // Types
 export type AssayType = 'HoFF' | 'T2943'
-export type HoFFMetric = 'HLT' | 'MLR' | 'TMLR' | 'FI'
+export type HoFFMetric = 'HLT' | 'MLR' | 'TMLR' | 'FI' | 'PL'
 
 export interface WellData {
   wellId: string
@@ -34,6 +34,10 @@ export interface AppState {
   selectedWells: Set<string>
   control0Wells: Set<string>
   control100Wells: Set<string>
+  /** Wells selected for Lysis % (must be sample wells); optional */
+  lysisPercentWells: Set<string>
+  /** Time t in minutes for Percentage Lysis output */
+  lysisPercentTimeT: number
   
   // Results
   results: AssayResult[]
@@ -61,6 +65,8 @@ export interface AppActions {
   setSelectedWells: (wells: Set<string>) => void
   setControl0Wells: (wells: Set<string>) => void
   setControl100Wells: (wells: Set<string>) => void
+  setLysisPercentWells: (wells: Set<string>) => void
+  setLysisPercentTimeT: (t: number) => void
   
   // Results
   setResults: (results: AssayResult[]) => void
@@ -103,6 +109,8 @@ export const useAssayStore = create<AppStore>((set, get) => ({
   selectedWells: new Set(),
   control0Wells: new Set(),
   control100Wells: new Set(),
+  lysisPercentWells: new Set(),
+  lysisPercentTimeT: 1,
   
   results: [],
   isLoading: false,
@@ -128,6 +136,8 @@ export const useAssayStore = create<AppStore>((set, get) => ({
   setSelectedWells: (wells) => set({ selectedWells: wells }),
   setControl0Wells: (wells) => set({ control0Wells: wells }),
   setControl100Wells: (wells) => set({ control100Wells: wells }),
+  setLysisPercentWells: (wells) => set({ lysisPercentWells: wells }),
+  setLysisPercentTimeT: (t) => set({ lysisPercentTimeT: t }),
   
   setResults: (results) => set({ results }),
   setLoading: (loading) => set({ isLoading: loading }),
@@ -150,6 +160,12 @@ export const useAssayStore = create<AppStore>((set, get) => ({
       // Check if we have selected wells
       if (state.selectedWells.size === 0) {
         set({ errors: ['No wells selected for analysis'], isLoading: false })
+        return
+      }
+
+      // Percentage Lysis output is shown in Parameters panel; no results table update
+      if (state.assayType === 'HoFF' && state.hoffMetric === 'PL') {
+        set({ results: [], isLoading: false })
         return
       }
       

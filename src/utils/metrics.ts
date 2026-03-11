@@ -320,7 +320,7 @@ export function getGlobalControlValues(
 export function calcHoFFWithDebug(options: {
   duplicate: number[][]
   bgCtrl: number[]
-  metric: 'HLT' | 'MLR' | 'TMLR' | 'FI'
+  metric: 'HLT' | 'MLR' | 'TMLR' | 'FI' | 'PL'
   window: number
   alexa0: number
   alexa100: number
@@ -339,7 +339,8 @@ export function calcHoFFWithDebug(options: {
   }
 } {
   const { duplicate, bgCtrl, metric, window, alexa0, alexa100, hltPercentage = 50 } = options
-  
+  if (metric === 'PL') return { result: 0, debug: { duplicateMean: [], normalizedValues: [], hltIndex: -1, diffValues: [], smoothedValues: [], netValues: [], mlr: 0, tmlr: -1 } }
+
   // Initialize debug object
   const debug = {
     duplicateMean: [] as number[],
@@ -473,7 +474,7 @@ export function calcT2943(duplicate: number[][], window: number, debug: boolean 
 export function calcHoFF(options: {
   duplicate: number[][]
   bgCtrl: number[]
-  metric: 'HLT' | 'MLR' | 'TMLR' | 'FI'
+  metric: 'HLT' | 'MLR' | 'TMLR' | 'FI' | 'PL'
   window: number
   alexa0: number
   alexa100: number
@@ -481,6 +482,7 @@ export function calcHoFF(options: {
   hltPercentage?: number
 }): number {
   const { duplicate, bgCtrl, metric, window, alexa0, alexa100, totalDuration, hltPercentage = 50 } = options
+  if (metric === 'PL') return 0 // Percentage Lysis is shown in Parameters panel, not in results table
   
   if (duplicate.length === 0 || bgCtrl.length === 0 || window <= 0) return 0
   
@@ -530,6 +532,21 @@ export function calcHoFF(options: {
     default:
       return 0
   }
+}
+
+/**
+ * Lysis % at a given time: (A(t) - A_0) / (A_100 - A_0) * 100
+ * valueAtT: raw absorbance at time t (minutes), alexa0/alexa100: 0% and 100% control values
+ */
+export function calcLysisPercentAtTime(
+  valueAtT: number,
+  alexa0: number,
+  alexa100: number
+): number {
+  const range = alexa100 - alexa0
+  if (!isFinite(valueAtT) || range === 0) return 0
+  const pct = ((valueAtT - alexa0) / range) * 100
+  return toPrecise(Math.max(0, Math.min(100, pct)))
 }
 
 /**

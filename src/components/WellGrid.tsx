@@ -5,6 +5,7 @@ interface WellGridProps {
   onChange: (wellId: string) => void
   control0Wells?: Set<string>
   control100Wells?: Set<string>
+  lysisPercentWells?: Set<string>
   onControl0Change?: (wellId: string) => void
   onControl100Change?: (wellId: string) => void
   mode?: 'wells' | 'control0' | 'control100' | 'combined'
@@ -16,6 +17,7 @@ export const WellGrid: React.FC<WellGridProps> = ({
   onChange,
   control0Wells = new Set(),
   control100Wells = new Set(),
+  lysisPercentWells = new Set(),
   mode = 'wells',
   disabled = false
 }) => {
@@ -32,6 +34,9 @@ export const WellGrid: React.FC<WellGridProps> = ({
       }
       if (control100Wells.has(wellId)) {
         return 'bg-green-500 text-white border-2 border-green-600'
+      }
+      if (lysisPercentWells.has(wellId)) {
+        return 'bg-yellow-400 text-gray-900 border-2 border-yellow-500'
       }
       if (selected.has(wellId)) {
         return 'bg-purple-500 text-white border-2 border-purple-600'
@@ -127,7 +132,6 @@ export const WellGrid: React.FC<WellGridProps> = ({
             <p className="flex items-center gap-2">
               <span className="w-4 h-4 bg-purple-500 rounded border"></span>
               Sample Wells: {(() => {
-                // Count wells that are in selected but not in control wells
                 let count = 0
                 for (const wellId of selected) {
                   if (!control0Wells.has(wellId) && !control100Wells.has(wellId)) {
@@ -136,6 +140,10 @@ export const WellGrid: React.FC<WellGridProps> = ({
                 }
                 return count
               })()}
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="w-4 h-4 bg-yellow-400 rounded border border-yellow-500"></span>
+              Lysis %: {lysisPercentWells.size}
             </p>
             <p className="flex items-center gap-2">
               <span className="w-4 h-4 bg-blue-500 rounded border"></span>

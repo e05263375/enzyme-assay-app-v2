@@ -14,7 +14,8 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({ onNext }) => {
     rawData,
     setSelectedWells,
     setControl0Wells,
-    setControl100Wells
+    setControl100Wells,
+    setLysisPercentWells
   } = useAssayStore()
 
   const handleNext = () => {
@@ -22,6 +23,7 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({ onNext }) => {
       setSelectedWells(new Set(rawData.map(w => w.wellId)))
       setControl0Wells(new Set())
       setControl100Wells(new Set())
+      setLysisPercentWells(new Set())
     }
     onNext?.()
   }
@@ -62,8 +64,12 @@ export const DataInputPanel: React.FC<DataInputPanelProps> = ({ onNext }) => {
 
       {rawData.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-gray-700">Time Series Plot (for validation)</h3>
-          <PlotArea compact />
+          <h3 className="text-sm font-medium text-gray-700">Time Series Plot</h3>
+          <div className="overflow-hidden" style={{ maxHeight: '400px' }}>
+            <div className="transform scale-[0.6] origin-top-left" style={{ width: '166.67%' }}>
+              <PlotArea />
+            </div>
+          </div>
         </div>
       )}
 
